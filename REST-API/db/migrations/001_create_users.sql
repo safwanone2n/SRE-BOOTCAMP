@@ -5,9 +5,9 @@ create table users (
   first_name varchar not null,
   last_name varchar not null,
   email text not null,
-  phone_number varchar 12
+  phone_number varchar
 );
 
 ---- create above / drop below ----
 
-drop table user;
+drop table users;
