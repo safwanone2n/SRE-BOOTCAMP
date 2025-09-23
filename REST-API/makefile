@@ -5,15 +5,8 @@ generate-query:
 	cd db; sqlc generate;
 
 MODULE := rest-api
-
 # directories for output
 MOCK_DIR := internal/mocks
-
-
-
-
-
-
 
 
 mocks:
@@ -34,3 +27,18 @@ mocks:
 	        -package=mocks \
 	        $(MODULE)/internal/user/repo UserRepository
 	@echo "✅ Mocks generated in $(MOCK_DIR)"
+
+
+APP_NAME := rest-api
+BUILD_DIR := build
+MAIN_PKG := ./cmd/server   # adjust if needed
+
+.PHONY: build clean
+
+build:
+	GOOS=darwin GOARCH=arm64 go build -o $(BUILD_DIR)/$(APP_NAME) $(MAIN_PKG)
+
+server: build
+	./$(BUILD_DIR)/$(APP_NAME)
+clean-build:
+	rm -rf $(BUILD_DIR)
