@@ -9,7 +9,10 @@ import (
 	userRepo "rest-api/internal/user/repo"
 	"rest-api/internal/user/usecases"
 
+	_ "rest-api/config"
+
 	"github.com/gin-gonic/gin"
+	"github.com/remiges-tech/logharbour/logharbour"
 )
 
 type Server struct {
@@ -24,29 +27,31 @@ func main() {
 
 }
 
-func RegisterRoutes(r *gin.Engine, userHandlerI handlers.UserHandlerI) {
-
-	user := r.Group("api/v1/student/")
-	{
-		user.POST("/create", userHandlerI.CreateUserHandler)
-		user.GET("/list", userHandlerI.GetAllUsersHandler)
-		user.GET("/get", userHandlerI.GetUserHandler)
-		user.PUT("/update", userHandlerI.UpdateUserHandler)
-		user.PUT("/delete", userHandlerI.DeleteUserHandler)
-	}
-
-}
 func InitializeDi() *Server {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	//initialzing gin instance
+	
+	//initializing gin instance
 	r := gin.Default()
 
+	file, err := os.OpenFile("log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	logger := logharbour.NewLogger(logharbour.NewLoggerContext(logharbour.Info), "REST-API", file)
+	
+	r.GET("/healthcheck", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "ok",
+		})
+	})
 	//collecting pgx pool connection
 	//if required for additional operations
 	//which are not provided by sqlc
-	_, err := db.GetConn(ctx)
+	_, err = db.GetConn(ctx)
 	if err != nil {
 		log.Fatal("error acquiring connection for db")
 	}
@@ -59,12 +64,12 @@ func InitializeDi() *Server {
 	//initializing user repo
 	userRepoI := userRepo.NewUserRepo(querier)
 	userUseCaseI := usecases.NewUserUseCases(userRepoI)
-	userHandlerI := handlers.NewUserHandler(userUseCaseI)
+	userHandlerI := handlers.NewUserHandler(userUseCaseI,logger)
 
 	//initialize repo
 
 	//registering api routes
-	RegisterRoutes(r,userHandlerI)
+	handlers.RegisterRoutes(r, userHandlerI)
 
 	//returning server
 	return &Server{
