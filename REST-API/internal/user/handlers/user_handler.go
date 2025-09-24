@@ -45,7 +45,8 @@ func (u *UserHandler) CreateUserHandler(ctx *gin.Context) {
 	}
 	logger.Log("finished create user handler")
 
-	commonutils.SendResponse(ctx, http.StatusCreated, user, nil)
+
+	commonutils.SendResponse(ctx, http.StatusCreated, models.IdResponse{Id: user.Id}, nil)
 }
 
 // DeleteUserHandler implements UserHandlerI.
@@ -102,7 +103,7 @@ func (u *UserHandler) DeleteUserHandler(ctx *gin.Context) {
 
 	logger.Log("finished delete user handler")
 
-	commonutils.SendResponse(ctx, http.StatusOK, nil, nil)
+	commonutils.SendResponse(ctx, http.StatusOK, models.IdResponse{Id: idRequest.ID}, nil)
 }
 
 // GetAllUsersHandler implements UserHandlerI.
@@ -275,7 +276,7 @@ func (u *UserHandler) UpdateUserHandler(ctx *gin.Context) {
 
 	logger.Log("finished update user handler")
 
-	commonutils.SendResponse(ctx, http.StatusOK, nil, nil)
+	commonutils.SendResponse(ctx, http.StatusOK, models.IdResponse{Id: user.Id}, nil)
 }
 
 type UserHandlerI interface {
@@ -295,13 +296,13 @@ func NewUserHandler(userUseCase userUseCase.UserUseCasesI,logger *logharbour.Log
 
 func RegisterRoutes(r *gin.Engine, userHandlerI UserHandlerI) {
 
-	user := r.Group("api/v1/student/")
+	user := r.Group("api/v1/users/")
 	{
 		user.POST("/create", userHandlerI.CreateUserHandler)
 		user.GET("/list", userHandlerI.GetAllUsersHandler)
 		user.GET("/get", userHandlerI.GetUserHandler)
 		user.PUT("/update", userHandlerI.UpdateUserHandler)
-		user.PUT("/delete", userHandlerI.DeleteUserHandler)
+		user.DELETE("/delete", userHandlerI.DeleteUserHandler)
 	}
 
 }

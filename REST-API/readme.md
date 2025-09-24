@@ -35,6 +35,17 @@ DATABASE_URL=postgres://postgres:yourpassword@localhost:5432/restapi?sslmode=dis
 PORT = :8080
 ```
 
+### required golang tools
+#### sqlc - type safe query generator
+```bash
+go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+
+```
+#### tern migrate - sql migrator
+```bash
+go install github.com/jackc/tern/v2@latest
+```
+
 ## Migrating DB
 ```make
 make db-migrate
