@@ -9,7 +9,7 @@ import (
 	userRepo "rest-api/internal/user/repo"
 	"rest-api/internal/user/usecases"
 
-	_ "rest-api/config"
+	// _ "rest-api/config"
 
 	"github.com/gin-gonic/gin"
 	"github.com/remiges-tech/logharbour/logharbour"
@@ -31,7 +31,7 @@ func InitializeDi() *Server {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	
+
 	//initializing gin instance
 	r := gin.Default()
 
@@ -42,7 +42,7 @@ func InitializeDi() *Server {
 	defer file.Close()
 
 	logger := logharbour.NewLogger(logharbour.NewLoggerContext(logharbour.Info), "REST-API", file)
-	
+
 	r.GET("/healthcheck", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "ok",
@@ -64,7 +64,7 @@ func InitializeDi() *Server {
 	//initializing user repo
 	userRepoI := userRepo.NewUserRepo(querier)
 	userUseCaseI := usecases.NewUserUseCases(userRepoI)
-	userHandlerI := handlers.NewUserHandler(userUseCaseI,logger)
+	userHandlerI := handlers.NewUserHandler(userUseCaseI, logger)
 
 	//initialize repo
 

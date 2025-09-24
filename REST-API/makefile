@@ -39,6 +39,15 @@ build:
 	GOOS=darwin GOARCH=arm64 go build -o $(BUILD_DIR)/$(APP_NAME) $(MAIN_PKG)
 
 server: build
-	./$(BUILD_DIR)/$(APP_NAME)
+	@env $$(grep -v '^#' .env | xargs) ./$(BUILD_DIR)/$(APP_NAME)
+
 clean-build:
 	rm -rf $(BUILD_DIR)
+
+image:
+	docker build -t $(APP_NAME):1.0.0 .
+
+image-run: image
+	docker run --name rest-app -p 8080:8081\
+	  --env-file .env \
+	 $(APP_NAME):1.0.0

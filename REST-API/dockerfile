@@ -1,0 +1,24 @@
+FROM golang:alpine AS builder
+
+LABEL maintainer="safwanone2n"
+
+WORKDIR /rest-api
+
+COPY go.mod .
+COPY go.sum .
+
+
+RUN go mod download
+
+COPY . .
+
+RUN  CGO_ENABLED=0 GOOS=linux go build -o rest_api ./cmd/server
+
+
+FROM alpine:latest
+
+COPY --from=builder /rest-api/rest_api .
+
+EXPOSE 8081 
+
+CMD [ "./rest_api" ]

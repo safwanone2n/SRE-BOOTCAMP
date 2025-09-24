@@ -60,9 +60,21 @@ make generate-query
 
 
 ## Running the Application
+
+### Local Run without Docker 
 ``` make
 make server
 ```
+
+### Local Run with Docker setup
+
+
+```make
+make image-run
+```
+
+
+
 
 ## The API will be available at: http://localhost:8080
 
