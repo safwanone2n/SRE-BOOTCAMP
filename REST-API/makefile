@@ -1,5 +1,13 @@
-db-migrate:
-	cd db/migrations;tern migrate;
+migrate-up:
+	@echo "Checking if migrations need to run..."
+	@if docker exec -i $(DB_CONTAINER) psql -U $$POSTGRES_USER -d $$POSTGRES_DB \
+	    -c "SELECT 1 FROM schema_version LIMIT 1;" >/dev/null 2>&1; then \
+	    echo "Database already migrated. Skipping."; \
+	else \
+	    echo "Running migrations..."; \
+	    cd db/migrations;tern migrate; \
+	fi
+
 
 generate-query:
 	cd db; sqlc generate;
@@ -51,3 +59,27 @@ image-run: image
 	docker run --name rest-app -p 8080:8081\
 	  --env-file .env \
 	 $(APP_NAME):1.0.0
+.PHONY: db
+DB_CONTAINER:= rest-db
+db:
+	@if [ "$$(docker ps -q -f name=$(DB_CONTAINER))" ]; then \
+		echo "Database container '$(DB_CONTAINER)' is already running."; \
+	else \
+		echo "Starting database container..."; \
+		docker compose up -d db; \
+		echo "Database container started."; \
+	fi
+
+db-migrate: db
+	@echo "Waiting 2 seconds for database to initialize..."
+	sleep 2
+	$(MAKE) migrate-up
+
+build-and-run-app: db-migrate
+
+	@echo "starting the rest-api application"
+	docker compose up -d app
+	@echo "application is started"
+	@echo "Checking application health..."
+	curl --fail http://localhost:8080/healthcheck || \
+		(echo "Healthcheck failed!" && exit 1)
