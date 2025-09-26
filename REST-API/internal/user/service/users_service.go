@@ -1,4 +1,4 @@
-package usecases
+package service
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	userRepo "rest-api/internal/user/repo"
 )
 
-type UserUseCasesI interface {
+type UserServiceI interface {
 	CreateUser(ctx context.Context, user *models.User) []commonutils.ErrorResponse
 	GetAllUsers(ctx context.Context, params models.FilterParams) ([]models.User, []commonutils.ErrorResponse)
 	GetUser(ctx context.Context, id int64) (models.User, []commonutils.ErrorResponse)
@@ -16,12 +16,12 @@ type UserUseCasesI interface {
 	DeleteUser(ctx context.Context, id int64) []commonutils.ErrorResponse
 }
 
-type UserUseCases struct {
+type UserService struct {
 	repo userRepo.UserRepoI
 }
 
-// CreateUser implements UserUseCasesI.
-func (u *UserUseCases) CreateUser(ctx context.Context, user *models.User) []commonutils.ErrorResponse {
+// CreateUser implements UserServiceI.
+func (u *UserService) CreateUser(ctx context.Context, user *models.User) []commonutils.ErrorResponse {
 
 	//any additional user validation / logic can be added here
 
@@ -35,8 +35,8 @@ func (u *UserUseCases) CreateUser(ctx context.Context, user *models.User) []comm
 	return nil
 }
 
-// DeleteUser implements UserUseCasesI.
-func (u *UserUseCases) DeleteUser(ctx context.Context, id int64) []commonutils.ErrorResponse {
+// DeleteUser implements UserServiceI.
+func (u *UserService) DeleteUser(ctx context.Context, id int64) []commonutils.ErrorResponse {
 	//any additional user validation / logic can be added here
 
 	err := u.repo.DeleteUser(ctx, id)
@@ -48,8 +48,8 @@ func (u *UserUseCases) DeleteUser(ctx context.Context, id int64) []commonutils.E
 	return nil
 }
 
-// GetAllUsers implements UserUseCasesI.
-func (u *UserUseCases) GetAllUsers(ctx context.Context, params models.FilterParams) ([]models.User, []commonutils.ErrorResponse) {
+// GetAllUsers implements UserServiceI.
+func (u *UserService) GetAllUsers(ctx context.Context, params models.FilterParams) ([]models.User, []commonutils.ErrorResponse) {
 	//any additional user validation / logic can be added here
 
 	users, err := u.repo.GetAllUsers(ctx, params)
@@ -61,8 +61,8 @@ func (u *UserUseCases) GetAllUsers(ctx context.Context, params models.FilterPara
 	return users, nil
 }
 
-// GetUser implements UserUseCasesI.
-func (u *UserUseCases) GetUser(ctx context.Context, id int64) (models.User, []commonutils.ErrorResponse) {
+// GetUser implements UserServiceI.
+func (u *UserService) GetUser(ctx context.Context, id int64) (models.User, []commonutils.ErrorResponse) {
 	//any additional user validation / logic can be added here
 
 	user, err := u.repo.GetUser(ctx, id)
@@ -74,8 +74,8 @@ func (u *UserUseCases) GetUser(ctx context.Context, id int64) (models.User, []co
 	return user, nil
 }
 
-// UpdateUser implements UserUseCasesI.
-func (u *UserUseCases) UpdateUser(ctx context.Context, user models.User) []commonutils.ErrorResponse {
+// UpdateUser implements UserServiceI.
+func (u *UserService) UpdateUser(ctx context.Context, user models.User) []commonutils.ErrorResponse {
 	//any additional user validation / logic can be added here
 
 	err := u.repo.UpdateUser(ctx, user)
@@ -87,8 +87,8 @@ func (u *UserUseCases) UpdateUser(ctx context.Context, user models.User) []commo
 	return nil
 }
 
-func NewUserUseCases(repo userRepo.UserRepoI) UserUseCasesI {
-	return &UserUseCases{
+func NewUserService(repo userRepo.UserRepoI) UserServiceI {
+	return &UserService{
 		repo: repo,
 	}
 }

@@ -16,7 +16,7 @@ import (
 
 type HandlerDeps struct {
 	Ctrl            *gomock.Controller
-	UserUseCaseMock *usermock.MockUserUseCasesI
+	UserServiceMock *usermock.MockUserServiceI
 }
 
 func NewHandlerDeps(t *testing.T) *HandlerDeps {
@@ -26,7 +26,7 @@ func NewHandlerDeps(t *testing.T) *HandlerDeps {
 
 	return &HandlerDeps{
 		Ctrl:            ctrl,
-		UserUseCaseMock: usermock.NewMockUserUseCasesI(ctrl),
+		UserServiceMock: usermock.NewMockUserServiceI(ctrl),
 	}
 }
 

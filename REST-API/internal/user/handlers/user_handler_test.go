@@ -30,12 +30,21 @@ func TestCreateUserHandler(t *testing.T) {
 				PhoneNumber: "test",
 			},
 			mockFunc: func(m *testutils.HandlerDeps) {
-				m.UserUseCaseMock.
+				m.UserServiceMock.
 					EXPECT().
 					CreateUser(gomock.Any(), gomock.AssignableToTypeOf(&models.User{})).
 					Return([]commonutils.ErrorResponse{})
 			},
 			expectedStatusCode: http.StatusCreated,
+		},
+		{
+			name: "fail - invalid request",
+			body: struct {
+				PhoneNumber int64 `json:"phone_number"`
+			}{
+				PhoneNumber: 123,
+			},
+			expectedStatusCode: http.StatusBadRequest,
 		},
 	}
 
@@ -44,10 +53,12 @@ func TestCreateUserHandler(t *testing.T) {
 			deps := testutils.NewHandlerDeps(t)
 
 			// set expectations
-			tc.mockFunc(deps)
+			if tc.mockFunc != nil {
+				tc.mockFunc(deps)
+			}
 			w := testutils.DoRequest(t,
 				func(r *gin.Engine) {
-					h := NewUserHandler(deps.UserUseCaseMock, logger)
+					h := NewUserHandler(deps.UserServiceMock, logger)
 					r.POST("/users/create", h.CreateUserHandler)
 				},
 				http.MethodPost, "/users/create", tc.body)
@@ -78,7 +89,7 @@ func TestGetAllUsersHandler(t *testing.T) {
 				},
 			},
 			mockFunc: func(m *testutils.HandlerDeps) {
-				m.UserUseCaseMock.
+				m.UserServiceMock.
 					EXPECT().
 					GetAllUsers(gomock.Any(), gomock.AssignableToTypeOf(models.FilterParams{})).
 					Return([]models.User{{
@@ -99,6 +110,15 @@ func TestGetAllUsersHandler(t *testing.T) {
 			},
 			expectedStatusCode: http.StatusOK,
 		},
+		{
+			name: "fail - invalid request",
+			body: struct {
+				FilterParam string `json:"filter_params"`
+			}{
+				FilterParam: "test",
+			},
+			expectedStatusCode: http.StatusBadRequest,
+		},
 	}
 
 	for _, tc := range testCases {
@@ -106,11 +126,12 @@ func TestGetAllUsersHandler(t *testing.T) {
 			deps := testutils.NewHandlerDeps(t)
 
 			// set expectations
-			tc.mockFunc(deps)
-
+			if tc.mockFunc != nil {
+				tc.mockFunc(deps)
+			}
 			w := testutils.DoRequest(t,
 				func(r *gin.Engine) {
-					h := NewUserHandler(deps.UserUseCaseMock, logger)
+					h := NewUserHandler(deps.UserServiceMock, logger)
 					r.GET("/users/list", h.GetAllUsersHandler)
 				},
 				http.MethodGet, "/users/list", tc.body)
@@ -138,7 +159,7 @@ func TestGetUserHandler(t *testing.T) {
 				ID: 1,
 			},
 			mockFunc: func(m *testutils.HandlerDeps) {
-				m.UserUseCaseMock.
+				m.UserServiceMock.
 					EXPECT().
 					GetUser(gomock.Any(), gomock.Any()).
 					Return(models.User{
@@ -152,6 +173,15 @@ func TestGetUserHandler(t *testing.T) {
 			},
 			expectedStatusCode: http.StatusOK,
 		},
+		{
+			name: "fail - invalid request",
+			body: struct {
+				Id string `json:"id"`
+			}{
+				Id: "1",
+			},
+			expectedStatusCode: http.StatusBadRequest,
+		},
 	}
 
 	for _, tc := range testCases {
@@ -159,11 +189,12 @@ func TestGetUserHandler(t *testing.T) {
 			deps := testutils.NewHandlerDeps(t)
 
 			// set expectations
-			tc.mockFunc(deps)
-
+			if tc.mockFunc != nil {
+				tc.mockFunc(deps)
+			}
 			w := testutils.DoRequest(t,
 				func(r *gin.Engine) {
-					h := NewUserHandler(deps.UserUseCaseMock, logger)
+					h := NewUserHandler(deps.UserServiceMock, logger)
 					r.GET("/users/get", h.GetUserHandler)
 				},
 				http.MethodGet, "/users/get", tc.body)
@@ -195,13 +226,22 @@ func TestUpdateUserHandler(t *testing.T) {
 				PhoneNumber: "test",
 			},
 			mockFunc: func(m *testutils.HandlerDeps) {
-				m.UserUseCaseMock.
+				m.UserServiceMock.
 					EXPECT().
 					UpdateUser(gomock.Any(), gomock.Any()).
 					Return(
 						[]commonutils.ErrorResponse{})
 			},
 			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name: "fail - invalid request",
+			body: struct {
+				Id string `json:"id"`
+			}{
+				Id: "1",
+			},
+			expectedStatusCode: http.StatusBadRequest,
 		},
 	}
 
@@ -210,11 +250,13 @@ func TestUpdateUserHandler(t *testing.T) {
 			deps := testutils.NewHandlerDeps(t)
 
 			// set expectations
-			tc.mockFunc(deps)
+			if tc.mockFunc != nil {
+				tc.mockFunc(deps)
+			}
 
 			w := testutils.DoRequest(t,
 				func(r *gin.Engine) {
-					h := NewUserHandler(deps.UserUseCaseMock, logger)
+					h := NewUserHandler(deps.UserServiceMock, logger)
 					r.PUT("/users/update", h.UpdateUserHandler)
 				},
 				http.MethodPut, "/users/update", tc.body)
@@ -242,13 +284,22 @@ func TestDeleteUserHandler(t *testing.T) {
 				ID: 1,
 			},
 			mockFunc: func(m *testutils.HandlerDeps) {
-				m.UserUseCaseMock.
+				m.UserServiceMock.
 					EXPECT().
 					DeleteUser(gomock.Any(), gomock.Any()).
 					Return(
 						[]commonutils.ErrorResponse{})
 			},
 			expectedStatusCode: http.StatusOK,
+		},
+		{
+			name: "fail - invalid request",
+			body: struct {
+				Id string `json:"id"`
+			}{
+				Id: "1",
+			},
+			expectedStatusCode: http.StatusBadRequest,
 		},
 	}
 
@@ -257,11 +308,13 @@ func TestDeleteUserHandler(t *testing.T) {
 			deps := testutils.NewHandlerDeps(t)
 
 			// set expectations
-			tc.mockFunc(deps)
+			if tc.mockFunc != nil {
+				tc.mockFunc(deps)
+			}
 
 			w := testutils.DoRequest(t,
 				func(r *gin.Engine) {
-					h := NewUserHandler(deps.UserUseCaseMock, logger)
+					h := NewUserHandler(deps.UserServiceMock, logger)
 					r.DELETE("/users/delete", h.DeleteUserHandler)
 				},
 				http.MethodDelete, "/users/delete", tc.body)

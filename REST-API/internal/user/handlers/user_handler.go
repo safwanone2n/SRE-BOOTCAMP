@@ -5,18 +5,34 @@ import (
 	"rest-api/internal/models"
 	commonutils "rest-api/internal/shared/common_utils"
 	"rest-api/internal/shared/constants"
-	userUseCase "rest-api/internal/user/usecases"
+	userService "rest-api/internal/user/service"
 
 	"github.com/gin-gonic/gin"
 	"github.com/remiges-tech/logharbour/logharbour"
 )
 
 type UserHandler struct {
-	userUseCase userUseCase.UserUseCasesI
+	userService userService.UserServiceI
 	logger      *logharbour.Logger
 }
 
-// CreateUserHandler implements UserHandlerI.
+type UserHandlerI interface {
+	CreateUserHandler(ctx *gin.Context)
+	GetAllUsersHandler(ctx *gin.Context)
+	GetUserHandler(ctx *gin.Context)
+	UpdateUserHandler(ctx *gin.Context)
+	DeleteUserHandler(ctx *gin.Context)
+}
+
+func NewUserHandler(userService userService.UserServiceI, logger *logharbour.Logger) UserHandlerI {
+	return &UserHandler{
+		userService: userService,
+		logger:      logger,
+	}
+}
+
+// CreateUserHandler handles the HTTP request to create a single user.
+// It satisfies the UserHandler interface.
 func (u *UserHandler) CreateUserHandler(ctx *gin.Context) {
 	var (
 		user   models.User
@@ -34,7 +50,7 @@ func (u *UserHandler) CreateUserHandler(ctx *gin.Context) {
 		})
 		return
 	}
-	if errorResponses := u.userUseCase.CreateUser(ctx, &user); len(errorResponses) > 0 {
+	if errorResponses := u.userService.CreateUser(ctx, &user); len(errorResponses) > 0 {
 		logger.Err().LogActivity("error creating user", map[string]any{
 			"user_email": user.Email,
 			"error":      errorResponses,
@@ -45,11 +61,11 @@ func (u *UserHandler) CreateUserHandler(ctx *gin.Context) {
 	}
 	logger.Log("finished create user handler")
 
-
 	commonutils.SendResponse(ctx, http.StatusCreated, models.IdResponse{Id: user.Id}, nil)
 }
 
-// DeleteUserHandler implements UserHandlerI.
+// DeleteUserHandler handles the HTTP request to delete a single user.
+// It satisfies the UserHandler interface.
 func (u *UserHandler) DeleteUserHandler(ctx *gin.Context) {
 	var (
 		idRequest models.IdRequest
@@ -86,7 +102,7 @@ func (u *UserHandler) DeleteUserHandler(ctx *gin.Context) {
 	})
 
 	// Call use-case layer
-	if errorResponses := u.userUseCase.DeleteUser(ctx, idRequest.ID); len(errorResponses) > 0 {
+	if errorResponses := u.userService.DeleteUser(ctx, idRequest.ID); len(errorResponses) > 0 {
 		logger.Err().
 			LogActivity("error deleting user", map[string]any{
 				"user_id": idRequest.ID,
@@ -106,7 +122,8 @@ func (u *UserHandler) DeleteUserHandler(ctx *gin.Context) {
 	commonutils.SendResponse(ctx, http.StatusOK, models.IdResponse{Id: idRequest.ID}, nil)
 }
 
-// GetAllUsersHandler implements UserHandlerI.
+// GetAllUsersHandler handles the HTTP request to get all users.
+// It satisfies the UserHandler interface.
 func (u *UserHandler) GetAllUsersHandler(ctx *gin.Context) {
 	var (
 		listRequest models.ListRequest
@@ -143,7 +160,7 @@ func (u *UserHandler) GetAllUsersHandler(ctx *gin.Context) {
 	})
 
 	// Call use-case layer
-	users, errorResponses := u.userUseCase.GetAllUsers(ctx, listRequest.FilterParams)
+	users, errorResponses := u.userService.GetAllUsers(ctx, listRequest.FilterParams)
 	if len(errorResponses) > 0 {
 		logger.Err().
 			LogActivity("error fetching users", map[string]any{
@@ -165,7 +182,8 @@ func (u *UserHandler) GetAllUsersHandler(ctx *gin.Context) {
 	commonutils.SendResponse(ctx, http.StatusOK, users, nil)
 }
 
-// GetUserHandler implements UserHandlerI.
+// GetUserHandler handles the HTTP request to fetch a single user.
+// It satisfies the UserHandler interface.
 func (u *UserHandler) GetUserHandler(ctx *gin.Context) {
 	var (
 		idRequest models.IdRequest
@@ -201,7 +219,7 @@ func (u *UserHandler) GetUserHandler(ctx *gin.Context) {
 	})
 
 	// Fetch the user
-	user, errorResponses := u.userUseCase.GetUser(ctx, idRequest.ID)
+	user, errorResponses := u.userService.GetUser(ctx, idRequest.ID)
 	if len(errorResponses) > 0 {
 		logger.Err().
 			LogActivity("error fetching user", map[string]any{
@@ -222,7 +240,8 @@ func (u *UserHandler) GetUserHandler(ctx *gin.Context) {
 	commonutils.SendResponse(ctx, http.StatusOK, user, nil)
 }
 
-// UpdateUserHandler implements UserHandlerI.
+// UpdateUserHandler handles the HTTP request to update a single user.
+// It satisfies the UserHandler interface.
 func (u *UserHandler) UpdateUserHandler(ctx *gin.Context) {
 	var (
 		user   models.User
@@ -259,7 +278,7 @@ func (u *UserHandler) UpdateUserHandler(ctx *gin.Context) {
 	})
 
 	// Call the use-case layer
-	if errorResponses := u.userUseCase.UpdateUser(ctx, user); len(errorResponses) > 0 {
+	if errorResponses := u.userService.UpdateUser(ctx, user); len(errorResponses) > 0 {
 		logger.Err().
 			LogActivity("error updating user", map[string]any{
 				"user_id": user.Id,
@@ -277,21 +296,6 @@ func (u *UserHandler) UpdateUserHandler(ctx *gin.Context) {
 	logger.Log("finished update user handler")
 
 	commonutils.SendResponse(ctx, http.StatusOK, models.IdResponse{Id: user.Id}, nil)
-}
-
-type UserHandlerI interface {
-	CreateUserHandler(ctx *gin.Context)
-	GetAllUsersHandler(ctx *gin.Context)
-	GetUserHandler(ctx *gin.Context)
-	UpdateUserHandler(ctx *gin.Context)
-	DeleteUserHandler(ctx *gin.Context)
-}
-
-func NewUserHandler(userUseCase userUseCase.UserUseCasesI,logger *logharbour.Logger) UserHandlerI {
-	return &UserHandler{
-		userUseCase: userUseCase,
-		logger:      logger,
-	}
 }
 
 func RegisterRoutes(r *gin.Engine, userHandlerI UserHandlerI) {

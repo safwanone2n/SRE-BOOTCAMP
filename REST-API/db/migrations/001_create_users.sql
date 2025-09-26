@@ -1,6 +1,6 @@
--- This is a sample migration.
+-- Migrating table users;
 
-create table users (
+  CREATE TABLE users (
   id serial primary key,
   first_name varchar not null,
   last_name varchar not null,
@@ -10,4 +10,4 @@ create table users (
 
 ---- create above / drop below ----
 
-drop table users;
+DROP TABLE users;

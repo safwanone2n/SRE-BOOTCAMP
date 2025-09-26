@@ -17,8 +17,8 @@ RUN  CGO_ENABLED=0 GOOS=linux go build -o rest_api ./cmd/server
 
 FROM alpine:latest
 
-COPY --from=builder /rest-api/rest_api .
+COPY --from=builder /rest-api/rest_api /rest
 
-EXPOSE 8081 
+EXPOSE 8081
 
-CMD [ "./rest_api" ]
+CMD [ "/rest" ]

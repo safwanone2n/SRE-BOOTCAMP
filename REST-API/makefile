@@ -16,11 +16,11 @@ mocks:
 	        -destination=$(MOCK_DIR)/sqlc/querier_mock.go \
 	        -package=mocks \
 	        $(MODULE)/db/sqlc querier.go
-	# internal/user/usecases UserService
-	mockgen -source=internal/user/usecases/users_usecaseses.go \
-	        -destination=$(MOCK_DIR)/user/usecase_mock.go \
+	# internal/user/service UserService
+	mockgen -source=internal/user/service/users_service.go \
+	        -destination=$(MOCK_DIR)/user/user_service_mock.go \
 	        -package=mocks \
-	        $(MODULE)/internal/user/usecases UserService
+	        $(MODULE)/internal/user/service UserService
 	# internal/user/repo UserRepository
 	mockgen -source=internal/user/repo/users_repo.go \
 	        -destination=$(MOCK_DIR)/user/repo_mock.go \
