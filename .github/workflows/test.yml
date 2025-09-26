@@ -8,7 +8,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.25'   # or your Go version
-      - run: go test ./... -coverprofile=coverage.out
+      - run: cd REST-API && go test ./... -coverprofile=coverage.out
       - uses: codecov/codecov-action@v4
         with:
           files: coverage.out
