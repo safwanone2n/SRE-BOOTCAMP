@@ -1,6 +1,7 @@
 # REST-API
 
-[![Go Tests](https://github.com/safwanone2n/SRE-BOOTCAMP/REST-API/actions/workflows/test.yml/badge.svg)](https://github.com/safwanone2n/SRE-BOOTCAMP/REST-API/actions/workflows/test.yml)
+[![Go Tests](https://github.com/safwanone2n/SRE-BOOTCAMP/actions/workflows/test.yml/badge.svg)](https://github.com/safwanone2n/SRE-BOOTCAMP/actions/workflows/test.yml)
+
 
 A lightweight **User Management System** that provides full CRUD operations for user data.
 
