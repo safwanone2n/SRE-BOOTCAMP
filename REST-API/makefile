@@ -83,3 +83,12 @@ build-and-run-app: db-migrate
 	@echo "Checking application health..."
 	curl --fail http://localhost:8080/healthcheck || \
 		(echo "Healthcheck failed!" && exit 1)
+
+action-build:
+	go build -v ./...
+
+action-test:
+	go test -v ./... -coverprofile=coverage.out
+
+action-lint:
+	golangci-lint run
