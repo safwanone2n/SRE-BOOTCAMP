@@ -1,18 +1,22 @@
 name: Label issues
+
 on:
   issues:
-    types:
-      - reopened
-      - opened
+    types: [opened, reopened]
+
 jobs:
   label_issues:
     runs-on: ubuntu-latest
     permissions:
       issues: write
     steps:
-      - run: gh issue edit "$NUMBER" --add-label "$LABELS"
+      - name: Set up GitHub CLI
+        uses: actions/setup-gh@v4
+
+      - name: Add triage label
+        run: gh issue edit "$NUMBER" --add-label "$LABELS"
         env:
-          GH_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           NUMBER: ${{ github.event.issue.number }}
           LABELS: triage
