@@ -8,7 +8,6 @@ migrate-up:
 	    cd db/migrations;tern migrate; \
 	fi
 
-
 generate-query:
 	cd db; sqlc generate;
 
