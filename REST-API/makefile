@@ -91,4 +91,7 @@ action-test:
 	go test -v ./... -coverprofile=coverage.out
 
 action-lint:
-	golangci-lint run
+	@echo "Running golangci-lint..."
+	@which golangci-lint >/dev/null 2>&1 || \
+		{ echo "Installing golangci-lint..."; go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; }
+	@$(GOPATH)/bin/golangci-lint run ./...
