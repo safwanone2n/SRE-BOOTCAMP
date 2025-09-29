@@ -92,6 +92,8 @@ action-test:
 
 action-lint:
 	@echo "Running golangci-lint..."
-	@which golangci-lint >/dev/null 2>&1 || \
-		{ echo "Installing golangci-lint..."; go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; }
-	@$(GOPATH)/bin/golangci-lint run ./...
+	@command -v golangci-lint >/dev/null 2>&1 || { \
+		echo "Installing golangci-lint..."; \
+		go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; \
+	}
+	@golangci-lint run ./...
