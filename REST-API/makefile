@@ -77,7 +77,7 @@ db-migrate: db
 build-and-run-app: db-migrate
 
 	@echo "starting the rest-api application"
-	docker compose up -d app
+	docker compose up -d api1 api2 nginx
 	@echo "application is started"
 	@echo "Checking application health..."
 	curl --fail http://localhost:8080/healthcheck || \
@@ -96,3 +96,6 @@ action-lint:
 		go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; \
 	}
 	@golangci-lint run ./...
+
+vagrant-run:
+	vagrant up

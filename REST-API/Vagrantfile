@@ -1,0 +1,17 @@
+Vagrant.configure("2") do |config|
+    # config.vm.network "public_network"
+   config.vm.network "private_network", ip: "192.168.56.10"
+    config.vm.box = "utm/debian11"
+    config.vm.provider "utm" do |vb|
+        vb.memory = "4096"
+        vb.cpus = 2
+        vb.directory_share_mode = "virtFS"
+
+    end
+  # Forward Docker container ports to host
+  config.vm.network "forwarded_port", guest: 8081, host: 8081  # API 1
+  config.vm.network "forwarded_port", guest: 8082, host: 8082  # API 2
+  config.vm.network "forwarded_port", guest: 8080, host: 8080    # Nginx
+    # config.vm.network "forwarded_port", guest:5432, host:5432
+    config.vm.provision "shell", path: "setup/provision.sh"
+end
