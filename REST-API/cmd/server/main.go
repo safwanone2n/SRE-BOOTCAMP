@@ -97,12 +97,12 @@ func InitializeDi(ctx context.Context) *Server {
 	}
 
 	//initializing user repo
-	userRepoI := userRepo.NewUserRepo(querier)
-	userServiceI := userService.NewUserService(userRepoI)
-	userHandlerI := handlers.NewUserHandler(userServiceI, logger)
+	userRepo := userRepo.NewUserRepo(querier)
+	userService := userService.NewUserService(userRepo)
+	userHandler := handlers.NewUserHandler(userService, logger)
 
 	//registering api routes
-	handlers.RegisterRoutes(r, userHandlerI)
+	handlers.RegisterRoutes(r, userHandler)
 
 	//returning server
 	return &Server{

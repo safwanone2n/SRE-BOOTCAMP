@@ -20,7 +20,17 @@ The project follows a layered architecture (handlers → use cases → repositor
 ## Prerequisites
 - Go 1.21+
 - PostgreSQL 13+
+- Docker ≥ 20.10 and Docker Compose v2
 - (Optional) Make for running provided build/test targets
+
+
+## Makefile Targets
+Common targets and their order:
+1. `make db` – start the Postgres container
+2. `make migrate-up` – apply database migrations
+3. `make build` – build the Go binary
+4. `make build-and-run-app` – build and run the application with Docker Compose
+5. `make server` – run the app locally without Docker
 
 ## Installation
 ```bash
@@ -33,9 +43,23 @@ go mod tidy
 
 ### create a .env file (or export environment variables)
 
+#### app env
 ```env
 DATABASE_URL=postgres://postgres:yourpassword@localhost:5432/restapi?sslmode=disable
 PORT = :8080
+```
+
+#### postgres env
+```env
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=restapi
+```
+
+
+## Starting DB
+```make
+make db
 ```
 
 ### required golang tools
@@ -51,8 +75,9 @@ go install github.com/jackc/tern/v2@latest
 
 ## Migrating DB
 ```make
-make db-migrate
+make migrate-up
 ```
+
 
 ## Generating SQL Queries
 
@@ -76,7 +101,11 @@ make server
 make image-run
 ```
 
+### Local Run with Docker Compose (DB, Database Migrations, Backend app)
 
+```make
+make build-and-run-app
+```
 
 
 ## The API will be available at: http://localhost:8080
