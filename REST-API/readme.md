@@ -27,6 +27,9 @@ Before setting up and running the project, ensure you have the following install
 - **Make** (optional, required for running provided build/test targets)
 - **Vagrant**
 - **UTM** ≤ 4.6.5 (macOS users only) — Refer to this guide for Apple Silicon setup: [Using UTM and Vagrant on Apple Silicon](https://one2n.io/blog/using-utm-and-vagrant-to-spin-up-dev-environments-on-apple-silicon-macs#the-importance-of-local-development)
+- **Minikube** — For running a local Kubernetes cluster
+- **kubectl** — Kubernetes CLI for interacting with clusters
+
 
 ## Makefile Targets
 Common targets and their order:
@@ -115,6 +118,12 @@ make build-and-run-app
 
 ``` make
 make vagrant-run
+```
+
+### Run with K8s (App, DB, Database Migrations, Vault, ESO)
+
+```
+make k8s-run
 ```
 
 

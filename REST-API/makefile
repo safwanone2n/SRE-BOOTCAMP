@@ -51,11 +51,28 @@ server: build
 clean-build:
 	rm -rf $(BUILD_DIR)
 
+APP_NAME := rest-api
+TAG := 1.1.2
+REPO_PATH := safwanseban
+
+# Build local image
 image:
-	docker build -t $(APP_NAME):1.0.0 .
+	docker build -t $(APP_NAME):$(TAG) .
+
+# Tag for Docker Hub
+tag:
+	docker tag $(APP_NAME):$(TAG) $(REPO_PATH)/$(APP_NAME):$(TAG)
+	# docker tag $(APP_NAME):$(TAG) $(REPO_PATH)/$(APP_NAME):latest
+
+# Push both versioned and latest tags
+push: image tag
+	docker push $(REPO_PATH)/$(APP_NAME):$(TAG)
+	docker push $(REPO_PATH)/$(APP_NAME):latest
+
+
 
 image-run: image
-	docker run --name rest-app -p 8080:8081\
+	docker run --name rest-app -p 8082:8081\
 	  --env-file .env \
 	 $(APP_NAME):1.0.0
 .PHONY: db
@@ -99,3 +116,7 @@ action-lint:
 
 vagrant-run:
 	vagrant up
+
+
+k8s-run:
+	cd k8s; sh ./setup.sh
