@@ -8,7 +8,6 @@ migrate-up:
 	    cd db/migrations;tern migrate; \
 	fi
 
-
 generate-query:
 	cd db; sqlc generate;
 
@@ -83,3 +82,17 @@ build-and-run-app: db-migrate
 	@echo "Checking application health..."
 	curl --fail http://localhost:8080/healthcheck || \
 		(echo "Healthcheck failed!" && exit 1)
+
+action-build:
+	go build -v ./...
+
+action-test:
+	go test -v ./... -coverprofile=coverage.out
+
+action-lint:
+	@echo "Running golangci-lint..."
+	@command -v golangci-lint >/dev/null 2>&1 || { \
+		echo "Installing golangci-lint..."; \
+		go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest; \
+	}
+	@golangci-lint run ./...

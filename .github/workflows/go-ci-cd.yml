@@ -1,0 +1,56 @@
+name: Go CI/CD
+
+on:
+  push:
+    paths:
+      - 'REST-API/**'
+  pull_request:
+    paths:
+      - 'REST-API/**'
+  workflow_dispatch:
+
+jobs:
+  build-test-lint-docker:
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        runner: [self-hosted, ubuntu-latest]
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Build
+        working-directory: REST-API
+        run: make action-build
+
+      - name: Test
+        working-directory: REST-API
+        run: make action-test
+
+      - name: Lint
+        working-directory: REST-API
+        run: make action-lint
+
+      - name: Log in to Docker Hub
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ex-04-github-actions'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push Docker image
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ex-04-github-actions'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./REST-API
+          file: ./REST-API/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/rest-api:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/rest-api:${{ github.sha }}
