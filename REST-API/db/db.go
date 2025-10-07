@@ -13,6 +13,9 @@ func GetConn(ctx context.Context, cfg *config.Config) (*pgxpool.Pool, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := pgx.Ping(ctx); err != nil {
+		return nil, err
+	}
 	return pgx, nil
 }
 

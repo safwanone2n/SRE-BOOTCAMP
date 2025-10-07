@@ -14,11 +14,25 @@ COPY . .
 
 RUN  CGO_ENABLED=0 GOOS=linux go build -o rest_api ./cmd/server
 
+# Install tern migration tool
+RUN go install github.com/jackc/tern/v2@latest
+
 
 FROM alpine:latest
+#COPYING DB migrations
+
+COPY --from=builder /rest-api/db/migrations /rest/db/migrations
 
 COPY --from=builder /rest-api/rest_api /rest
 
+# Copy tern binary from Go build image
+COPY --from=builder /go/bin/tern /usr/local/bin/tern
+
+
 EXPOSE 8081
 
-CMD [ "/rest" ]
+# Optional: set environment variable for tern config location
+ENV TERN_CONFIG=/rest/db/migrations/tern.conf
+
+
+CMD ["sh", "-c", "cd /rest && ./rest_api"]
