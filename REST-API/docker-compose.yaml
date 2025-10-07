@@ -1,27 +1,62 @@
 services:
-  app:
+  api1:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: rest-api
+    container_name: rest-api-1
     env_file:
       - .env
     depends_on:
       - db
     ports:
-      - "8080:8081"
+      - "8081:8081"  # Exposed on host port 8080
+    restart: unless-stopped
+
+  api2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rest-api-2
+    env_file:
+      - .env
+    depends_on:
+      - db
+    ports:
+      - "8082:8081"  # Exposed on host port 8081
     restart: unless-stopped
 
   db:
     image: postgres:14.5
     container_name: rest-db
     env_file:
-      - .env         # Reads POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+      - .env
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    container_name: rest-nginx
+    depends_on:
+      - api1
+      - api2
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    restart: unless-stopped
+
+  tools:
+    image: golang:1.25
+    container_name: rest-tools
+    env_file:
+      - .env
+    working_dir: /app
+    volumes:
+      - ./:/app
+    # entrypoint: ["sleep", "infinity"]
 
 volumes:
   pgdata:
