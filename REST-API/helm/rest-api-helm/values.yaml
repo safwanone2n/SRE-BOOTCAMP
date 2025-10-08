@@ -1,0 +1,76 @@
+config:
+  port: ":8080"
+
+external-secrets:
+  installCRDs: true
+  namespace: external-secrets
+
+db:
+  enabled: true
+  name: postgres
+  svc_name: postgres-service
+  image: postgres:15
+  port: 5432
+  nodeType: database
+  useESO: true           # enable ESO integration
+  esoSecret: rest-api-secrets
+  user: postgres         # fallback if ESO disabled
+  password: postgres
+  database: restapi
+  database_url: postgres://postgres:postgres@postgres-service:5432/restapi?sslmode=disable
+  replicaCount: 1
+
+app:
+  enabled: true
+  name: rest-api
+  svc_name: rest-api-service
+  image: safwanseban/rest-api
+  tag: 1.1.2
+  port: 8080
+  nodeType: application
+  migrationPath: /rest/db/migrations
+  replicaCount: 2
+
+
+eso:
+  enabled: true
+  clusterSecretStoreName: vault-secretstore
+  vaultPath: "secret"
+  externalSecretName: restapi-db-creds
+  namespace: rest-api-namespace
+  tokenSecret: vault-token
+  data:
+    - secretKey: POSTGRES_USER
+      remoteKey: restapi
+      property: user
+    - secretKey: POSTGRES_PASSWORD
+      remoteKey: restapi
+      property: password
+    - secretKey: POSTGRES_DB
+      remoteKey: restapi
+      property: database
+    - secretKey: DATABASE_URL
+      remoteKey: restapi
+      property: database_url
+# vault.vault-namespace.svc.cluster.local:8200
+
+vault:
+  name: rest-api-release-vault.vault-namespace
+  enabled: false
+  server:
+    # dataStorage:
+    #   enabled: true
+    #   storageClass: "standard"   # your k8s storage class
+    #   accessMode: ReadWriteOnce
+    #   size: 1Gi
+
+    dev:
+      enabled: true
+    ha:
+      enabled: false
+    extraEnvironmentVars:
+      VAULT_DEV_ROOT_TOKEN_ID: root
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+  global:
+    enabled: true
+    namespace: "vault-namespace"

@@ -120,3 +120,5 @@ vagrant-run:
 
 k8s-run:
 	cd k8s; sh ./setup.sh
+helm-run:
+	cd helm; sh ./setup.sh

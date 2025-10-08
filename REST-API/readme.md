@@ -126,6 +126,12 @@ make vagrant-run
 make k8s-run
 ```
 
+### Run with Helm (App, DB, Database Migrations, Vault, ESO)
+
+```
+make helm-run
+```
+
 
 ## The API will be available at: http://localhost:8080
 

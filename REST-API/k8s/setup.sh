@@ -87,11 +87,11 @@ echo "  export VAULT_ADDR=http://127.0.0.1:8200"
 echo "  export VAULT_TOKEN=root"
 echo "Application is accessible at http://localhost:8080"
 
-# ------------------------------
-#  🔹 Cleanup function on exit
-# ------------------------------
-# cleanup() {
-#   echo "Cleaning up port-forwards..."
-#   kill $PF_VAULT $PF_APP || true
-# }
-# trap cleanup EXIT
+------------------------------
+ 🔹 Cleanup function on exit
+------------------------------
+cleanup() {
+  echo "Cleaning up port-forwards..."
+  kill $PF_VAULT $PF_APP || true
+}
+trap cleanup EXIT

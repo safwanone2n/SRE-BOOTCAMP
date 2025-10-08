@@ -1,0 +1,137 @@
+{{- /*
+Deployment template supporting App + DB with init container for migrations
+and ESO/Vault integration for secrets
+*/ -}}
+
+{{- $namespace := .Release.Namespace }}
+
+{{- if .Values.db.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.db.name }}
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ .Values.db.name }}
+spec:
+  replicas: {{ .Values.db.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.db.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.db.name }}
+    spec:
+      nodeSelector:
+        type: {{ .Values.db.nodeType }}
+      containers:
+        - name: {{ .Values.db.name }}
+          image: {{ .Values.db.image }}
+          ports:
+            - containerPort: {{ .Values.db.port }}
+          env:
+            {{- if .Values.db.useESO }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.esoSecret }}
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.esoSecret }}
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.esoSecret }}
+                  key: POSTGRES_DB
+            {{- else }}
+            - name: POSTGRES_USER
+              value: {{ .Values.db.user }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.db.password }}
+            - name: POSTGRES_DB
+              value: {{ .Values.db.database }}
+            {{- end }}
+{{- end }}
+---
+{{- if .Values.app.enabled }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.app.name }}
+  namespace: {{ $namespace }}
+  labels:
+    app: {{ .Values.app.name }}
+spec:
+  replicas: {{ .Values.app.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.app.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.app.name }}
+    spec:
+      nodeSelector:
+        type: {{ .Values.app.nodeType }}
+      initContainers:
+        - name: run-db-migrations
+          image: {{ .Values.app.image }}:{{ .Values.app.tag }}
+          command:
+            - sh
+            - -c
+            - |
+              cd {{ .Values.app.migrationPath }}
+              tern migrate
+          env:
+            - name: POSTGRES_HOST
+              value: {{ .Values.db.name }}
+            - name: POSTGRES_PORT
+              value: "{{ .Values.db.port }}"
+            {{- if .Values.db.useESO }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.esoSecret }}
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.esoSecret }}
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.esoSecret }}
+                  key: POSTGRES_DB
+            {{- else }}
+            - name: POSTGRES_USER
+              value: {{ .Values.db.user }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.db.password }}
+            - name: POSTGRES_DB
+              value: {{ .Values.db.database }}
+            {{- end }}
+      containers:
+        - name: {{ .Values.app.name }}
+          image: {{ .Values.app.image }}:{{ .Values.app.tag }}
+          ports:
+            - containerPort: {{ .Values.app.port }}
+          env:
+            - name: PORT
+              value: "{{ .Values.config.port }}"
+            {{- if .Values.db.useESO }}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.db.esoSecret }}
+                  key: DATABASE_URL
+            {{- else }}
+            - name: DATABASE_URL
+              value: {{ .Values.db.databaseUrl }}
+            {{- end }}
+{{- end }}

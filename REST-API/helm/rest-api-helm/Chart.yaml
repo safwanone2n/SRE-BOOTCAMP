@@ -1,0 +1,15 @@
+apiVersion: v2
+name: rest-api
+description: Helm chart for deploying the REST API application
+type: application
+version: 0.1.0
+appVersion: "1.1.2"
+dependencies:
+  - name: external-secrets
+    version: 0.20.2      # latest stable community ESO chart version
+    repository: https://charts.external-secrets.io
+    alias: external-secrets
+  - name: vault
+    version: 0.31.0     # official HashiCorp vault chart
+    repository: https://helm.releases.hashicorp.com
+    alias: vault
